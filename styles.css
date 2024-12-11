@@ -1,0 +1,281 @@
+/* General Styling */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #222;
+  color: #ddd;
+}
+
+.callsign-input {
+  text-align: center;
+  background-color: #383838; /* Transparent background */
+  color: white;                 /* White text */
+  border: 1px solid rgb(96, 96, 96);      /* Optional: White border for better visibility */
+  padding: 5px;                 /* Add some padding for better UX */
+  border-radius: 4px;           /* Optional: Rounded corners */
+}
+
+textarea {
+  resize: vertical;
+}
+
+.dispatch-panel {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h2 {
+  color: #fff;
+}
+
+select {
+  text-align: center; /* Center the text and dropdowns horizontally */
+}
+
+/* Buttons */
+.status-btn {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.status-btn.gray {
+  background-color: #6c757d;
+}
+
+.status-btn.blue {
+  background-color: #007bff;
+}
+
+.status-btn.green {
+  background-color: #28a745;
+}
+
+.status-btn.red {
+  background-color: #dc3545;
+}
+
+.status-btn.orange {
+  background-color: #fd7e14;
+}
+
+.status-btn.yellow {
+  background-color: #ffc107;
+}
+
+/* Tables */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden; /* Ensures content doesn't overflow rounded corners */
+}
+
+.table th,
+.table td {
+  padding: 6px 12px;
+  /* Reduced padding */
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.table th {
+  background-color: #333;
+}
+
+.table td {
+  background-color: #444;
+}
+
+/* Reduce width for specific columns */
+.table th:nth-child(1),
+/* Call # */
+.table td:nth-child(1),
+.table th:last-child,
+/* Actions */
+.table td:last-child {
+  width: 10%;
+}
+
+/* Dropdown (Priority Styling) */
+select {
+  padding: 6px 12px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #2b2b2b;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  appearance: none;
+  /* Remove default dropdown styling */
+}
+
+#add-unit-btn {
+  background-color: rgb(35, 153, 57);
+}
+
+select:focus {
+  border-color: #ffa500;
+  /* Highlight on focus */
+  background-color: #333;
+}
+
+/* Buttons inside tables */
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#clear-page {
+  background-color: #dc3545;
+}
+
+form label {
+  display: block;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background-color: #333;
+  color: #fff;
+}
+
+form button {
+  margin-right: 10px;
+}
+
+
+
+
+
+
+/* Changelog Menu Styles */
+.changelog-menu {
+  background-color: #222; /* Dark background */
+  color: #f5f5f5; /* Light text */
+  border-radius: 10px;
+  width: 600px; /* Larger width */
+  max-width: 90%; /* Ensure responsiveness */
+  padding: 30px; /* More padding */
+  position: fixed;
+  top: 50%; /* Vertically center */
+  left: 50%; /* Horizontally center */
+  transform: translate(-50%, -50%); /* Perfect centering */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  font-family: Arial, sans-serif;
+  border: 1px solid #444;
+  overflow: hidden; /* To ensure top bar doesn't overflow */
+}
+
+/* Top Bar */
+.changelog-menu::before {
+  content: '';
+  display: block;
+  height: 8px; /* Bar height */
+  background: linear-gradient(90deg, #007bff, #3498db); /* Blue gradient */
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  margin: -30px -30px 20px; /* Align the bar correctly */
+}
+
+/* Header */
+.changelog-menu .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px; /* Adjusted spacing */
+}
+
+.changelog-menu .title {
+  font-size: 24px; /* Larger font for the title */
+  font-weight: bold;
+}
+
+.changelog-menu .close-button {
+  background: none;
+  border: none;
+  font-size: 22px; /* Slightly larger */
+  color: #f5f5f5;
+  cursor: pointer;
+  padding: 8px;
+}
+
+button:hover {
+  filter: brightness(80%); /* Darken the button by reducing brightness */
+}
+
+.changelog-menu .close-button:hover {
+  color: #ff4444;
+}
+
+/* Content */
+.changelog-menu .content h2 {
+  margin: 0;
+  font-size: 20px; /* Larger for better visibility */
+  font-weight: bold;
+  color: #fff;
+}
+
+.changelog-menu .content h3 {
+  margin-top: 15px;
+  font-size: 18px;
+  color: #f5f5f5;
+}
+
+.changelog-menu ul {
+  margin: 10px 0 0;
+  padding-left: 25px;
+}
+.changelog-menu ul li {
+  color: inherit; /* Keep the text color unchanged */
+  line-height: 1.6; /* Improve readability */
+  list-style-type: disc; /* Default bullet style */
+  list-style-position: inside;
+}
+
+.changelog-menu ul li::marker {
+  color: #007bff; /* Change bullet point color to blue */
+}
+
+/* Add these styles to your existing CSS */
+.FVMPD {
+  background-color: #011b58;
+}
+
+.NPS {
+  background-color: #127501;
+}
+
+.OUSO {
+  background-color: #866551;
+}
+
+.WSP {
+  background-color: #476fb4;
+}
+
+.GVFD {
+  background-color: #9b3a3a;
+}
+
+.WisDOT {
+  background-color: #e49310;
+}

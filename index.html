@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCC - Dispatch Manager | Truckville</title>
+  <link rel="icon" href="assets/publicsafety.png">
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="changelog-menu" id="ChangelogMenu" style="display: none;">
+    <div class="header">
+      <span class="title">Changelog</span>
+      <button class="close-button" onclick="toggleChangeLogMenu()">✖</button>
+    </div>
+    <div class="content">
+      <h2 id="version-heading"></h2>
+
+      <h3>Added</h3>
+      <ul>
+        <li>Left Shift functionality to delete records without prompt!</li>
+        <li>New change-logs menu.</li>
+        <li>10 Codes page.</li>
+        <li>Edit calls & bolo functionality.</li>
+        <li>Unit dept. changes background color upon selection.</li>
+      </ul>
+
+      <h3>Enhancements</h3>
+      <ul>
+        <li>Visuals on tables have been improved!</li>
+        <li>Replaced text buttons with image for delete & edit.</li>
+        <li>Made call description input a not required field.</li>
+      </ul>
+
+      <h3>Fixes</h3>
+      <ul>
+        <li>Fixed unit's assigned dynamic call not saving.</li>
+      </ul>
+
+    </div>
+  </div>
+
+
+  <div class="dispatch-panel">
+    <!-- Header -->
+    <div class="header">
+      <img src="assets/logo.png" alt="Logo" style="height: 40px; vertical-align: middle;">
+  
+      <button class="status-btn gray" id="dashboard-btn" onclick="showPage('dashboard', this)">Dashboard</button>
+      <button class="status-btn orange" id="create-bolo-btn" onclick="showPage('create-bolo', this)">Create
+        BOLO</button>
+      <button class="status-btn blue" id="create-call-btn" onclick="showPage('create-call', this)">Create Call</button>
+      <button style="background-color: rgb(167, 79, 255);" class="status-btn blue" id="10cdes-btn" onclick="showPage('10-codes', this)">10 Codes</button>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div class="section" id="dashboard-page">
+      <h2>Active Calls / Scenes</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th style="width: 10%;">Priority</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="calls-table-body">
+          <!-- Dynamic Content -->
+        </tbody>
+      </table>
+
+      <h2>Active Units</h2>
+      <button id="add-unit-btn" style="margin-bottom: 20px;">Add Unit</button>
+      <table style="width: 90%;" class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Callsign</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Assigned Call</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="units-table-body">
+          <!-- Dynamic Content -->
+        </tbody>
+      </table>
+
+
+
+      <h2>BOLOs</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Description</th>
+            <th>Last Seen</th>
+            <th>Reason</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bolos-table-body">
+          <!-- Dynamic Content -->
+        </tbody>
+      </table>
+
+      <button id="clear-page">Reset Dashboard</button>
+    </div>
+
+    <!-- Create BOLO Section -->
+    <div class="section" id="create-bolo-page" style="display: none;">
+      <h2>Create BOLO</h2>
+      <form id="create-bolo-form">
+        <label>
+          BOLO Description:
+          <input type="text" id="bolo-description" required autocomplete="off">
+        </label>
+        <label>
+          Last Seen:
+          <input type="text" id="bolo-last-seen" required autocomplete="off">
+        </label>
+        <label>
+          Reason:
+          <textarea id="bolo-reason" required></textarea>
+        </label>
+        <button type="submit">Create BOLO</button>
+        <button id="clear-page" type="reset">Clear</button>
+      </form>
+    </div>
+
+    <!-- Create Call Section -->
+    <div class="section" id="create-call-page" style="display: none;">
+      <h2>Create Call</h2>
+      <form id="create-call-form">
+        <label>
+          Call Type:
+          <input type="text" id="call-type" required autocomplete="off">
+        </label>
+        <label>
+          Priority:
+          <select id="call-priority" required>
+            <option value="" disabled selected>Level</option>
+            <option value="Priority 1">Priority 1</option>
+            <option value="Priority 2">Priority 2</option>
+            <option value="Priority 3">Priority 3</option>
+          </select>
+        </label>
+        <label>
+          Location:
+          <input type="text" id="call-location" required autocomplete="off">
+        </label>
+        <label>
+          Description:
+          <textarea id="call-description"></textarea>
+        </label>
+        <button type="submit">Create Call</button>
+        <button id="clear-page" type="reset">Clear</button>
+      </form>
+    </div>
+
+    <!-- Edit BOLO Section -->
+    <div class="section" id="edit-bolo-page" style="display: none;">
+      <h2>Edit BOLO</h2>
+      <form id="edit-bolo-form">
+        <label>
+          BOLO Description:
+          <input type="text" id="edit-bolo-description" required autocomplete="off">
+        </label>
+        <label>
+          Last Seen:
+          <input type="text" id="edit-bolo-last-seen" required autocomplete="off">
+        </label>
+        <label>
+          Reason:
+          <textarea id="edit-bolo-reason" required></textarea>
+        </label>
+        <button type="submit">Make Changes</button>
+        <button id="clear-page" type="reset">Clear</button>
+      </form>
+    </div>
+
+    <!-- Edit Call Section -->
+    <div class="section" id="edit-call-page" style="display: none;">
+      <h2>Edit Call</h2>
+      <form id="edit-call-form">
+        <label>
+          Call Type:
+          <input type="text" id="edit-call-type" required autocomplete="off">
+        </label>
+        <label>
+          Priority:
+          <select id="edit-call-priority" required>
+            <option value="" disabled selected>Level</option>
+            <option value="Priority 1">Priority 1</option>
+            <option value="Priority 2">Priority 2</option>
+            <option value="Priority 3">Priority 3</option>
+          </select>
+        </label>
+        <label>
+          Location:
+          <input type="text" id="edit-call-location" required autocomplete="off">
+        </label>
+        <label>
+          Description:
+          <textarea id="edit-call-description"></textarea>
+        </label>
+        <button type="submit">Make Changes</button>
+        <button id="clear-page" type="reset">Clear</button>
+      </form>
+    </div>
+
+<!-- 10 Codes Section -->
+<div class="section" id="10-codes-page" style="display: none;">
+  <h2>10 Codes Reference</h2>
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+    <table class="table" style="width: 48%; margin-right: 2%;">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Reference & Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10-1</td><td>Frequency Change</td></tr>
+        <tr><td>10-3</td><td>Stop Transmitting</td></tr>
+        <tr><td>10-4</td><td>Affirmative</td></tr>
+        <tr><td>10-5</td><td>Meal Break</td></tr>
+        <tr><td>10-6</td><td>Busy</td></tr>
+        <tr><td>10-7</td><td>Out of Service</td></tr>
+        <tr><td>10-8</td><td>In Service</td></tr>
+        <tr><td>10-9</td><td>Repeat</td></tr>
+        <tr><td>10-10</td><td>Fight in Progress</td></tr>
+        <tr><td>10-11</td><td>Traffic Stop</td></tr>
+        <tr><td>10-12</td><td>Active Ride Along</td></tr>
+        <tr><td>10-13</td><td>Shots Fired</td></tr>
+        <tr><td>10-14</td><td>Hold All but Emergency Traffic</td></tr>
+        <tr><td>10-15</td><td>Subject in Custody</td></tr>
+        <tr><td>10-16</td><td>Stolen Vehicle</td></tr>
+        <tr><td>10-17</td><td>Suspicious Person</td></tr>
+        <tr><td>10-20</td><td>Location</td></tr>
+        <tr><td>10-22</td><td>Disregard</td></tr>
+        <tr><td>10-23</td><td>Arrived on Scene</td></tr>
+        <tr><td>10-24</td><td>Meet at location</td></tr>
+        <tr><td>10-25</td><td>Domestic Dispute</td></tr>
+        <tr><td>10-26</td><td>Estimated Time of Arrival</td></tr>
+        <tr><td>10-27</td><td>Drivers License Check</td></tr>
+        <tr><td>10-28</td><td>Vehicle License Plate</td></tr>
+        <tr><td>10-29</td><td>NCIC Warrant Check</td></tr>
+        <tr><td>10-30</td><td>Unnecessary Use of Radio</td></tr>
+        <tr><td>10-31</td><td>Not Wanted, No Warrants</td></tr>
+        <tr><td>10-32</td><td>Request Backup</td></tr>
+      </tbody>
+    </table>
+
+    <table class="table" style="width: 48%;">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Reference & Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10-41</td><td>Beginning Tour of Duty</td></tr>
+        <tr><td>10-42</td><td>Ending Tour of Duty</td></tr>
+        <tr><td>10-43</td><td>Information</td></tr>
+        <tr><td>10-49</td><td>Homicide</td></tr>
+        <tr><td>10-50</td><td>Motor Vehicle Accident</td></tr>
+        <tr><td>10-51</td><td>Request DOT</td></tr>
+        <tr><td>10-52</td><td>Request EMS</td></tr>
+        <tr><td>10-53</td><td>Request FD</td></tr>
+        <tr><td>10-55</td><td>Intoxicated Driver</td></tr>
+        <tr><td>10-56</td><td>Intoxicated Pedestrian</td></tr>
+        <tr><td>10-60</td><td>Armed with a Gun</td></tr>
+        <tr><td>10-61</td><td>Armed with a Knife</td></tr>
+        <tr><td>10-62</td><td>Kidnapping</td></tr>
+        <tr><td>10-64</td><td>Sexual Assault</td></tr>
+        <tr><td>10-65</td><td>Escorting Prisoner</td></tr>
+        <tr><td>10-66</td><td>Reckless Driving</td></tr>
+        <tr><td>10-67</td><td>Fire</td></tr>
+        <tr><td>10-68</td><td>Armed Robbery</td></tr>
+        <tr><td>10-70</td><td>Foot Pursuit</td></tr>
+        <tr><td>10-71</td><td>Active Supervisor</td></tr>
+        <tr><td>10-73</td><td>Advise Status</td></tr>
+        <tr><td>10-80</td><td>Vehicle Pursuit</td></tr>
+        <tr><td>10-90</td><td>RTO Warning</td></tr>
+        <tr><td>10-93</td><td>Removed from Patrol</td></tr>
+        <tr><td>10-97</td><td>En Route</td></tr>
+        <tr><td>10-99</td><td>Officer In Distress</td></tr>
+        <tr><td>11-99</td><td>Officer Down</td></tr>
+        <tr><td>11-44</td><td>Person Deceased</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+    
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
