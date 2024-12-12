@@ -4,7 +4,7 @@ let calls = [];
 let bolos = [];
 
 // Current website version
-const websiteInfo = { version: "0.1.1" };
+const websiteInfo = { version: "0.1.2" };
 const releaseDate = "12/11/2024";
 document.getElementById("version-heading").textContent = `[DEV ${websiteInfo.version}] - ${releaseDate}`;
 
@@ -81,6 +81,7 @@ function updateUnit(index, key, value) {
 
   // Get the select element for the department
   const deptSelect = document.querySelector(`#units-table-body tr:nth-child(${index + 1}) td select`);
+  const statusSelect = document.querySelector(`#units-table-body tr:nth-child(${index + 1}) td:first-child`);
 
   // Update the department background color
   if (key === 'dept') {
@@ -91,12 +92,41 @@ function updateUnit(index, key, value) {
     const currentDept = units[index].dept;
     deptSelect.classList.remove(...deptSelect.classList); // Remove any existing classes
     deptSelect.classList.add(currentDept);  // Re-add the current department class
+
+    // Update the border color based on the new status
+    statusSelect.style.borderLeftColor = getStatusColor(value);
   }
 
   saveData();  // Save the updated data
 }
 
 
+function getStatusColor(status) {
+  switch (status) {
+    case 'N/A':
+      return 'transparent';
+    case '10-6':
+      return '#121212';
+    case '10-5':
+      return '#f2a01b';
+    case '10-7':
+      return '#ff4545';
+    case '10-8':
+      return '#56d938';
+    case '10-11':
+      return '#b347e6';
+    case '10-23':
+      return '#102640';
+    case '10-80':
+      return '#f51111';
+    case '10-97':
+      return '#4a47e6';
+    case 'Panic':
+      return '#910606';
+    default:
+      return 'transparent';
+  }
+}
 
 function renderUnits() {
   const tbody = document.getElementById('units-table-body');
@@ -104,7 +134,7 @@ function renderUnits() {
     .map(
       (unit, index) => `
       <tr>
-        <td>
+        <td style="border-left: 3px solid ${getStatusColor(unit.status)};">
           <input type="text" 
                  class="callsign-input" 
                  value="${unit.username}" 
