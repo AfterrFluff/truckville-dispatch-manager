@@ -14,6 +14,7 @@
 | ![status: Planned](https://img.shields.io/badge/status-Planned-blue) | Add User Settings |
 | ![status: Planned](https://img.shields.io/badge/status-Planned-blue) | Proper Navbar (Zulu time displayed) |
 
-## [DEV 0.1.2] - 12/11/2024
-### Added
-- Unit statuses now affect the color of the username's border.
+## [DEV 0.1.2.1] - 12/17/2024
+### Visual Improvements
+- Redid the CSS design visual for unit dropdowns.
+- Made unit inputs transparent background & borderless.
