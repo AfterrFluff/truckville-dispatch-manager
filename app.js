@@ -4,10 +4,9 @@ let calls = [];
 let bolos = [];
 
 // Current website version
-const websiteInfo = { version: "0.1.2" };
-const releaseDate = "12/11/2024";
+const websiteInfo = { version: "0.1.2.1" };
+const releaseDate = "12/17/2024";
 document.getElementById("version-heading").textContent = `[DEV ${websiteInfo.version}] - ${releaseDate}`;
-
 
 // Track if Shift key is pressed
 let isShiftPressed = false;
@@ -135,14 +134,14 @@ function renderUnits() {
       (unit, index) => `
       <tr>
         <td style="border-left: 3px solid ${getStatusColor(unit.status)};">
-          <input type="text" 
+          <input style="background-color:#444444;border:0;border-radius:0;" type="text" 
                  class="callsign-input" 
                  value="${unit.username}" 
                  onchange="updateUnit(${index}, 'username', this.value)" 
                  placeholder="Enter Username">
         </td>
         <td>
-          <input type="text" 
+          <input style="background-color:#444444;border:0;border-radius:0;" type="text" 
                  class="callsign-input" 
                  value="${unit.callsign}" 
                  onchange="updateUnit(${index}, 'callsign', this.value)" 
@@ -160,10 +159,10 @@ function renderUnits() {
           </select>
         </td>
         <td>
-          <select onchange="updateUnit(${index}, 'status', this.value)">
+          <select style="background-color:#444444;border:0;border-bottom:1.5px solid #828282;border-radius:0;" onchange="updateUnit(${index}, 'status', this.value)">
             <option value="N/A" ${unit.status === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="10-6" ${unit.status === '10-6' ? 'selected' : ''}>10-6 Busy</option>
             <option value="10-5" ${unit.status === '10-5' ? 'selected' : ''}>10-5 Meal Break</option>
+            <option value="10-6" ${unit.status === '10-6' ? 'selected' : ''}>10-6 Busy</option>
             <option value="10-7" ${unit.status === '10-7' ? 'selected' : ''}>10-7 Unavailable</option>
             <option value="10-8" ${unit.status === '10-8' ? 'selected' : ''}>10-8 Available</option>
             <option value="10-11" ${unit.status === '10-11' ? 'selected' : ''}>10-11 Traffic</option>
@@ -175,7 +174,7 @@ function renderUnits() {
         </td>
 
         <td>
-          <select onchange="updateUnit(${index}, 'assignedCall', this.value)">
+          <select style="background-color:#444444;border:0;border-bottom:1.5px solid #828282;border-radius:0;" onchange="updateUnit(${index}, 'assignedCall', this.value)">
             <option value="" ${unit.assignedCall === '' ? 'selected' : ''}>None</option>
             ${calls
               .map(call => `
