@@ -9,11 +9,10 @@ body {
 
 .callsign-input {
   text-align: center;
-  background-color: #383838; /* Transparent background */
-  color: white;                 /* White text */
-  border: 1px solid rgb(96, 96, 96);      /* Optional: White border for better visibility */
+  color: #ddd;                 /* White text */
   padding: 5px;                 /* Add some padding for better UX */
   border-radius: 4px;           /* Optional: Rounded corners */
+  font-size: 16px;
 }
 
 textarea {
@@ -32,6 +31,7 @@ h2 {
 
 select {
   text-align: center; /* Center the text and dropdowns horizontally */
+  cursor: pointer;
 }
 
 /* Buttons */
@@ -109,8 +109,8 @@ select {
   border: 1px solid #555;
   border-radius: 4px;
   background-color: #2b2b2b;
-  color: #fff;
-  font-size: 14px;
+  color: #ddd;
+  font-size: 16px;
   outline: none;
   appearance: none;
   /* Remove default dropdown styling */
@@ -180,7 +180,6 @@ form button {
   transform: translate(-50%, -50%); /* Perfect centering */
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
   z-index: 1000;
-  font-family: Arial, sans-serif;
   border: 1px solid #444;
   overflow: hidden; /* To ensure top bar doesn't overflow */
 }
