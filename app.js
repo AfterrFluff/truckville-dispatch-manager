@@ -4,8 +4,8 @@ let calls = [];
 let bolos = [];
 
 // Current website version
-const websiteInfo = { version: "0.1.2.1" };
-const releaseDate = "12/17/2024";
+const websiteInfo = { version: "0.1.2.2" };
+const releaseDate = "12/30/2024";
 document.getElementById("version-heading").textContent = `[DEV ${websiteInfo.version}] - ${releaseDate}`;
 
 // Track if Shift key is pressed
@@ -51,6 +51,20 @@ function showPage(page, button) {
     button.classList.add('active');
   }
 }
+
+// --- ZULU ---
+function updateZuluTime() {
+  const now = new Date();
+  const hours = String(now.getUTCHours()).padStart(2, '0');
+  const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+  document.getElementById('zulu-time').textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+// Update the time every second
+setInterval(updateZuluTime, 1000);
+// Initialize the time immediately
+updateZuluTime();
 
 // --- UNITS ---
 document.getElementById('add-unit-btn').addEventListener('click', addUnit);
