@@ -116,6 +116,12 @@ select {
   /* Remove default dropdown styling */
 }
 
+.time-container {
+  font-size: 28px;
+  margin: 0px;
+  margin-left: 20px;
+}
+
 #add-unit-btn {
   background-color: rgb(35, 153, 57);
 }
