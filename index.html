@@ -2,293 +2,313 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OCC - Dispatch Manager | Truckville</title>
-  <link rel="icon" href="assets/publicsafety.png">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OCC Dispatch | .gg/truckville</title>
+    <link rel="icon" href="assets/favicon.ico" />
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
 </head>
 
 <body>
-  <div class="changelog-menu" id="ChangelogMenu" style="display: none;">
-    <div class="header">
-      <span class="title">Changelog</span>
-      <button class="close-button" onclick="toggleChangeLogMenu()">✖</button>
+    <div class="app">
+        <!--SERVER RESPONSE-->
+        <div class="response-bg" id="response-bg">
+        </div>
+
+        <!-- CHANGE LOGS -->
+        <div class="popup-backdrop" id="popup-backdrop"></div>
+        <div class="changelog__menu" id="changelog-menu" style="display: none;">
+            <div class="frame__topbar">
+                <div>
+                    <span id="changelog_ver">
+                        Update 0.0
+                    </span>
+                    is now live
+                </div>
+                <button class="changelog__close-btn" onclick="closeChangelogs()">✖</button>
+            </div>
+
+            <div class="content">
+                <h2 id="version-heading"></h2>
+
+                <h3>Welcome to the newest Truckville OCC Dispatch update!</h3>
+                This update marks an important milestone for our Dispatch Manager. Of course, it's still in beta, but we
+                did not have amazing visuals, new functionality and responsive interface like we do now.
+                <ul>
+                    <li>Rebuilt website from ground up!</li>
+                    <li>Custom system messages!</li>
+                    <li>Redesigned call functionality!</li>
+                    <li>Access the Greenville map in-app!</li>
+                    <li>And so much more behind-the-scenes changes!</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="setting__menu" id="settings-menu" style="display: none;">
+            <div class="frame__topbar">
+                <span>
+                    Settings
+                </span>
+                <button class="changelog__close-btn" onclick="toggleSettingsFrame()">✖</button>
+            </div>
+
+            <div class="setting__toggles">
+                <!--<div class="togDiv">
+                    <input style="width: 20px; height: 20px;" type="checkbox" id="setting__tog-unitAvail" onchange="refreshSettings()">
+                    Set unit status to available by default
+                </div>-->
+                This feature is currently unavailable and is in the works.
+            </div>
+        </div>
+
+        <header class="header">
+            <div class="header-left">
+                <img class="header__logo" src="assets/favicon.ico" alt="Logo">
+
+                <div class="header__text">
+                    <b>OCC DISPATCH</b>
+                    .gg/truckville
+                </div>
+
+                <div class="header__vertical-line"></div>
+
+                <!--Buttons-->
+                <div class="header__section__buttons">
+                    <button class="button header__btn header__selected-btn" style="height: auto; width: auto;"
+                        onclick="showPage('dashboard', this)">
+                        <img class="header-section__button-logo" src="assets/icons/dash_vector.png">
+                        Dashboard
+                    </button>
+
+                    <button class="button header__btn" style="height: auto; width: auto;"
+                        onclick="showPage('map', this)">
+                        <img class="header-section__button-logo" src="assets/icons/map.png">
+                        Map
+                    </button>
+
+                    <button class="button header__btn" style="height: auto; width: auto;"
+                        onclick="showPage('about', this)">
+                        <img class="header-section__button-logo" src="assets/icons/about_vector.png">
+                        About Us
+                    </button>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <!--ZULU-->
+                <div class="zulu-display" id="zulu-display">0:00:00</div>
+                <div class="header__vertical-line" style="margin:0px;"></div>
+
+                <!--Right Buttons-->
+                <a class="button" target="_blank" href="https://github.com/AfterrFluff/truckville-dispatch-manager">
+                    <img class="header-section__button-logo" src="assets/icons/github_logo.png" alt="GitHub">
+                </a>
+
+                <a class="button" target="_blank" href="https://discord.gg/truckville">
+                    <img class="header-section__button-logo" src="assets/icons/discord_logo.png" alt="Discord">
+                </a>
+
+                <a class="button" onclick="toggleSettingsFrame()">
+                    <img class="header-section__button-logo" src="assets/icons/setting_vector.png" alt="Settings">
+                </a>
+            </div>
+        </header>
+
+        <div class="page-container" id="dashboard-page">
+            <div class="page-block">
+                <div class="dispatch-parent">
+                    <div class="dispatch-subsection" style="grid-row: span 2;">
+                        <div class="dispatch-block_title">ACTIVE UNITS
+                            <button class="button"
+                                style="border: 2px solid #3b6cec; height: 22px; width: 22px; border-radius: 1em; padding: 5px; font-size: 18px;"
+                                id="add-unit-btn">
+                                +
+                            </button>
+                        </div>
+
+                        <table class="q-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">UNIT NUMBER</th>
+                                    <th>NAME</th>
+                                    <th style="width: 125px;">DEPARTMENT</th>
+                                    <th style="width: 175px;">STATUS</th>
+                                    <th style="width: 70px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="q-table__units-body">
+                                <!-- DYNAMIC -->
+                            </tbody>
+                        </table>
+
+                        <div id="no-active-units"
+                            style="color: rgba(216, 220, 238, 0.365); margin-top: 10px; text-align: center;">NO ACTIVE
+                            UNITS
+                        </div>
+                    </div>
+                    <div class="dispatch-subsection">
+                        <div class="dispatch-block_title" id="dispatch-call-title"
+                            style="justify-content: space-between;">
+                            <div id="dispatch-title-id">NEW DISPATCH</div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="button"
+                                    style="border: 2px solid rgb(236, 59, 59); height: auto; width: auto; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
+                                    id="clear-editor-btn">
+                                    CLEAR EDITOR
+                                </button>
+
+                                <button class="button"
+                                    style="border: 2px solid #26a69a; height: auto; width: auto; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
+                                    id="create-call-btn">
+                                    CREATE CALL
+                                </button>
+
+                                <button class="button"
+                                    style="display:none; border: 2px solid #ff9419; height: auto; width: auto; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
+                                    id="update-call-btn">
+                                    UPDATE CALL
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 8px;" id="attached-units-display">
+                            ATTACHED UNITS:
+                        </div>
+                        <div>
+                            <div style="display: flex; margin: 10px 0px; gap: 10px;">
+                                <input id="id-title-input" style="width: 150px;" class="call-input" placeholder="TITLE">
+                                <input id="id-location-input" class="call-input" placeholder="LOCATION">
+                                <select id="id-priority-input" style="width: 150px;" class="call-input">
+                                    <option value="N/A" disabled selected>PRIORITY</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; margin: 10px 0px; gap: 10px;">
+                                <textarea id="id-description-input" class="call-input call-input__ta"
+                                    placeholder="DESCRIPTION"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dispatch-subsection">
+                        <div class="dispatch-block_title">ACTIVE SCENES</div>
+
+                        <table class="q-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">ID</th>
+                                    <th>TITLE</th>
+                                    <th>LOCATION</th>
+                                    <th>UNITS</th>
+                                    <th style="width: 100px;">PRIORITY</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="q-table__calls-body">
+                                <!-- DYNAMIC -->
+                            </tbody>
+                        </table>
+
+                        <div id="no-active-calls"
+                            style="color: rgba(216, 220, 238, 0.365); margin-top: 10px; text-align: center;">NO ACTIVE
+                            SCENES/CALLS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-container" id="map-page" style="display: none;">
+            <div class="page-block map"></div>
+        </div>
+
+        <div class="page-container" id="about-page" style="display: none;">
+            <div class="page-block">
+                <div class="page-block_title">About</div>
+                Truckville's OCC Dispatch Manager is a free, volunteer-driven initiative designed to streamline
+                operations for OCC Telecommunicators. Our goal is to provide a reliable and user-friendly tool to
+                enhance efficiency and effectiveness in dispatch management.
+                <br><br>
+                This project is made possible through the use of public resources and contributions from open-source
+                platforms. In the spirit of collaboration, it is also open-source and available on my GitHub page.
+                Should you encounter any issues or have feature requests, feel free to reach out to me on Discord
+                (@afterrfluff) or submit a request on GitHub.
+
+                If you would like to join our community server and enhance your role-playing experience with quality,
+                check out Truckville using this link:
+                <a href="https://discord.gg/truckville" target="_blank"
+                    style="color: #3b6cec;">https://discord.gg/truckville
+                </a>
+
+                <br><br><br><br>
+
+                <div class="page-block_title">Privacy Policy</div>
+                <h3>1. Information We Collect</h3>
+                <br>
+                We do not directly collect personal information from our users. However, we may utilize local
+                storage in your browser to enhance your user experience.
+                The data stored locally may include preferences, settings, and session data to ensure seamless
+                interaction with our platform. The data stored in your local storage is accessible only within your
+                browser and is not shared with any external servers or third parties.
+
+                <br><br>
+                <h3>2. Data Security</h3>
+                <br>
+                We prioritize the security of your data. By using local storage, we limit the risk of sensitive data
+                exposure since this information remains on your device and is not transmitted over the internet.
+                Nevertheless, we recommend using secure devices and maintaining up-to-date browser security measures.
+
+                <br><br>
+                <h3>3. Policy Updates</h3>
+                <br>
+                We may update this Privacy Policy from time to time to reflect changes in our practices or for other
+                operational, legal, or regulatory reasons. Any changes will be communicated clearly on this page, so we
+                encourage you to review it periodically.
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p class="footer__ver" id="ver">v1.0.0</p>
+            <div class="footer__vertical-line"></div>
+            <p>Property of Truckville</p>
+            <div class="footer__vertical-line"></div>
+            <p>PC Only (Mobile Unsupported)</p>
+            <div class="footer__vertical-line"></div>
+
+            <div class="footer__active-box">
+                <div>
+                    <span id="footer-units">
+                        0
+                    </span>
+                    units
+                </div>
+                <div class="footer__vertical-line"></div>
+                <div>
+                    <span id="footer-calls">
+                        0
+                    </span>
+                    scenes
+                </div>
+                <div class="footer__vertical-line"></div>
+                <div>
+                    <span id="footer-bolos">
+                        0
+                    </span>
+                    bolos
+                </div>
+            </div>
+
+            <div class="footer__vertical-line"></div>
+
+            <button class="button"
+                style="background-color: rgba(255, 54, 54, 0.783); height: 22px; width: auto; border-radius: 6px;"
+                onclick="resetDashboard()">
+                Reset Dashboard
+            </button>
+        </footer>
     </div>
-    <div class="content">
-      <h2 id="version-heading"></h2>
-
-      <h3>Added</h3>
-      <ul>
-        <li>Zulu time display counter at the top (header).</li>
-      </ul>
-
-    </div>
-  </div>
-
-
-  <div class="dispatch-panel">
-    <!-- Header -->
-    <div class="header" style="display: flex; align-items: center;">
-      <img src="assets/logo.png" alt="Logo" style="height: 40px; vertical-align: middle;">
-  
-      <button class="status-btn gray" id="dashboard-btn" onclick="showPage('dashboard', this)">Dashboard</button>
-      <button class="status-btn orange" id="create-bolo-btn" onclick="showPage('create-bolo', this)">Create
-        BOLO</button>
-      <button class="status-btn blue" id="create-call-btn" onclick="showPage('create-call', this)">Create Call</button>
-      <button style="background-color: rgb(167, 79, 255);" class="status-btn blue" id="10cdes-btn" onclick="showPage('10-codes', this)">10 Codes</button>
-      <h2 id="zulu-time" class="time-container">Initializing...</h2>
-    </div>
-
-    <!-- Dashboard Section -->
-    <div class="section" id="dashboard-page">
-      <h2>Active Calls / Scenes</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th style="width: 10%;">Priority</th>
-            <th>Location</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="calls-table-body">
-          <!-- Dynamic Content -->
-        </tbody>
-      </table>
-
-      <h2>Active Units</h2>
-      <button id="add-unit-btn" style="margin-bottom: 20px;">Add Unit</button>
-      <table style="width: 90%;" class="table">
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Callsign</th>
-            <th>Department</th>
-            <th>Status</th>
-            <th>Assigned Call</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="units-table-body">
-          <!-- Dynamic Content -->
-        </tbody>
-      </table>
-
-
-
-      <h2>BOLOs</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th style="width: 30%;">Description</th>
-            <th>Last Seen</th>
-            <th>Reason</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="bolos-table-body">
-          <!-- Dynamic Content -->
-        </tbody>
-      </table>
-
-      <button id="clear-page">Reset Dashboard</button>
-    </div>
-
-    <!-- Create BOLO Section -->
-    <div class="section" id="create-bolo-page" style="display: none;">
-      <h2>Create BOLO</h2>
-      <form id="create-bolo-form">
-        <label>
-          BOLO Description:
-          <input type="text" id="bolo-description" required autocomplete="off">
-        </label>
-        <label>
-          Last Seen:
-          <input type="text" id="bolo-last-seen" required autocomplete="off">
-        </label>
-        <label>
-          Reason:
-          <textarea id="bolo-reason" required></textarea>
-        </label>
-        <button type="submit">Create BOLO</button>
-        <button id="clear-page" type="reset">Clear</button>
-      </form>
-    </div>
-
-    <!-- Create Call Section -->
-    <div class="section" id="create-call-page" style="display: none;">
-      <h2>Create Call</h2>
-      <form id="create-call-form">
-        <label>
-          Call Type:
-          <input type="text" id="call-type" required autocomplete="off">
-        </label>
-        <label>
-          Priority:
-          <select id="call-priority" required>
-            <option value="" disabled selected>Level</option>
-            <option value="Priority 1">Priority 1</option>
-            <option value="Priority 2">Priority 2</option>
-            <option value="Priority 3">Priority 3</option>
-          </select>
-        </label>
-        <label>
-          Location:
-          <input type="text" id="call-location" required autocomplete="off">
-        </label>
-        <label>
-          Description:
-          <textarea id="call-description"></textarea>
-        </label>
-        <button type="submit">Create Call</button>
-        <button id="clear-page" type="reset">Clear</button>
-      </form>
-    </div>
-
-    <!-- Edit BOLO Section -->
-    <div class="section" id="edit-bolo-page" style="display: none;">
-      <h2>Edit BOLO</h2>
-      <form id="edit-bolo-form">
-        <label>
-          BOLO Description:
-          <input type="text" id="edit-bolo-description" required autocomplete="off">
-        </label>
-        <label>
-          Last Seen:
-          <input type="text" id="edit-bolo-last-seen" required autocomplete="off">
-        </label>
-        <label>
-          Reason:
-          <textarea id="edit-bolo-reason" required></textarea>
-        </label>
-        <button type="submit">Make Changes</button>
-        <button id="clear-page" type="reset">Clear</button>
-      </form>
-    </div>
-
-    <!-- Edit Call Section -->
-    <div class="section" id="edit-call-page" style="display: none;">
-      <h2>Edit Call</h2>
-      <form id="edit-call-form">
-        <label>
-          Call Type:
-          <input type="text" id="edit-call-type" required autocomplete="off">
-        </label>
-        <label>
-          Priority:
-          <select id="edit-call-priority" required>
-            <option value="" disabled selected>Level</option>
-            <option value="Priority 1">Priority 1</option>
-            <option value="Priority 2">Priority 2</option>
-            <option value="Priority 3">Priority 3</option>
-          </select>
-        </label>
-        <label>
-          Location:
-          <input type="text" id="edit-call-location" required autocomplete="off">
-        </label>
-        <label>
-          Description:
-          <textarea id="edit-call-description"></textarea>
-        </label>
-        <button type="submit">Make Changes</button>
-        <button id="clear-page" type="reset">Clear</button>
-      </form>
-    </div>
-
-<!-- 10 Codes Section -->
-<div class="section" id="10-codes-page" style="display: none;">
-  <h2>10 Codes Reference</h2>
-  <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-    <table class="table" style="width: 48%; margin-right: 2%;">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Reference & Meaning</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>10-1</td><td>Frequency Change</td></tr>
-        <tr><td>10-3</td><td>Stop Transmitting</td></tr>
-        <tr><td>10-4</td><td>Affirmative</td></tr>
-        <tr><td>10-5</td><td>Meal Break</td></tr>
-        <tr><td>10-6</td><td>Busy</td></tr>
-        <tr><td>10-7</td><td>Out of Service</td></tr>
-        <tr><td>10-8</td><td>In Service</td></tr>
-        <tr><td>10-9</td><td>Repeat</td></tr>
-        <tr><td>10-10</td><td>Fight in Progress</td></tr>
-        <tr><td>10-11</td><td>Traffic Stop</td></tr>
-        <tr><td>10-12</td><td>Active Ride Along</td></tr>
-        <tr><td>10-13</td><td>Shots Fired</td></tr>
-        <tr><td>10-14</td><td>Hold All but Emergency Traffic</td></tr>
-        <tr><td>10-15</td><td>Subject in Custody</td></tr>
-        <tr><td>10-16</td><td>Stolen Vehicle</td></tr>
-        <tr><td>10-17</td><td>Suspicious Person</td></tr>
-        <tr><td>10-20</td><td>Location</td></tr>
-        <tr><td>10-22</td><td>Disregard</td></tr>
-        <tr><td>10-23</td><td>Arrived on Scene</td></tr>
-        <tr><td>10-24</td><td>Meet at location</td></tr>
-        <tr><td>10-25</td><td>Domestic Dispute</td></tr>
-        <tr><td>10-26</td><td>Estimated Time of Arrival</td></tr>
-        <tr><td>10-27</td><td>Drivers License Check</td></tr>
-        <tr><td>10-28</td><td>Vehicle License Plate</td></tr>
-        <tr><td>10-29</td><td>NCIC Warrant Check</td></tr>
-        <tr><td>10-30</td><td>Unnecessary Use of Radio</td></tr>
-        <tr><td>10-31</td><td>Not Wanted, No Warrants</td></tr>
-        <tr><td>10-32</td><td>Request Backup</td></tr>
-      </tbody>
-    </table>
-
-    <table class="table" style="width: 48%;">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Reference & Meaning</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>10-41</td><td>Beginning Tour of Duty</td></tr>
-        <tr><td>10-42</td><td>Ending Tour of Duty</td></tr>
-        <tr><td>10-43</td><td>Information</td></tr>
-        <tr><td>10-49</td><td>Homicide</td></tr>
-        <tr><td>10-50</td><td>Motor Vehicle Accident</td></tr>
-        <tr><td>10-51</td><td>Request DOT</td></tr>
-        <tr><td>10-52</td><td>Request EMS</td></tr>
-        <tr><td>10-53</td><td>Request FD</td></tr>
-        <tr><td>10-55</td><td>Intoxicated Driver</td></tr>
-        <tr><td>10-56</td><td>Intoxicated Pedestrian</td></tr>
-        <tr><td>10-60</td><td>Armed with a Gun</td></tr>
-        <tr><td>10-61</td><td>Armed with a Knife</td></tr>
-        <tr><td>10-62</td><td>Kidnapping</td></tr>
-        <tr><td>10-64</td><td>Sexual Assault</td></tr>
-        <tr><td>10-65</td><td>Escorting Prisoner</td></tr>
-        <tr><td>10-66</td><td>Reckless Driving</td></tr>
-        <tr><td>10-67</td><td>Fire</td></tr>
-        <tr><td>10-68</td><td>Armed Robbery</td></tr>
-        <tr><td>10-70</td><td>Foot Pursuit</td></tr>
-        <tr><td>10-71</td><td>Active Supervisor</td></tr>
-        <tr><td>10-73</td><td>Advise Status</td></tr>
-        <tr><td>10-80</td><td>Vehicle Pursuit</td></tr>
-        <tr><td>10-90</td><td>RTO Warning</td></tr>
-        <tr><td>10-93</td><td>Removed from Patrol</td></tr>
-        <tr><td>10-97</td><td>En Route</td></tr>
-        <tr><td>10-99</td><td>Officer In Distress</td></tr>
-        <tr><td>11-99</td><td>Officer Down</td></tr>
-        <tr><td>11-44</td><td>Person Deceased</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
-    
-
-  </div>
-
-  <script src="app.js"></script>
 </body>
 
 </html>
