@@ -1,449 +1,478 @@
-// In-memory data storage
+//Variables/Constants
 let units = [];
 let calls = [];
 let bolos = [];
+let settings = [
+    unitAvail = false,
+    instantDelete = false,
+    disableNotifications = false,
+    simpleZulu = false,
+];
+let selectedCall = 0; //0 default unselected
+let callId = 0;
 
-// Current website version
-const websiteInfo = { version: "0.1.2.2" };
-const releaseDate = "12/30/2024";
-document.getElementById("version-heading").textContent = `[DEV ${websiteInfo.version}] - ${releaseDate}`;
+//Changelogs
+const websiteInfo = { version: "0.2.2" };
+const localInfo = JSON.parse(localStorage.getItem("localInfo")) || { version: "" };
+const blurdrop = document.getElementById("popup-backdrop");
+document.getElementById("ver").textContent = `v${websiteInfo.version}`; document.getElementById("changelog_ver").textContent = `Update ${websiteInfo.version}`;
+
+function closeChangelogs() {
+    const changelogDiv = document.getElementById("changelog-menu");
+    changelogDiv.style.display = 'none'; blurdrop.style.display = 'none';
+    localStorage.setItem("localInfo", JSON.stringify(websiteInfo)); // Update stored version
+}
+
+// Check for version mismatch
+if (websiteInfo.version !== localInfo.version) {
+    const changelogDiv = document.getElementById("changelog-menu");
+    changelogDiv.style.display = 'block'; blurdrop.style.display = 'block';
+}
+
+//ZULU
+function updateZuluTime() {
+    const now = new Date();
+    const isoString = now.toISOString();
+    const [date, timeWithMilliseconds] = isoString.split('T');
+
+    // Remove milliseconds from the time
+    const time = timeWithMilliseconds.split('.')[0];
+
+    document.getElementById('zulu-display').textContent = `${date} ${time}Z`;
+}
+
+updateZuluTime();
+setInterval(updateZuluTime, 1000);
+
+//Page Handling
+function showPage(page, button) {
+    // Hide all sections
+    document.querySelectorAll('.page-container').forEach((frame) => {
+        frame.style.display = 'none';
+    });
+
+    // Show the target section
+    document.getElementById(`${page}-page`).style.display = 'flex';
+
+    // Update button styles
+    if (button) {
+        document.querySelectorAll('.header__btn').forEach((btn) => btn.classList.remove('header__selected-btn'));
+        button.classList.add('header__selected-btn');
+    }
+}
+
+function showMessage(type, text, duration = 3000) {
+    // Create a new message element
+    const message = document.createElement('div');
+    message.className = `response__msg response_${type}`;
+    message.textContent = text;
+
+    // Add the message to the container
+    const container = document.getElementById('response-bg');
+    container.appendChild(message);
+
+    // Remove the message after the specified duration
+    setTimeout(() => {
+        message.classList.add('hidden');
+        message.addEventListener('transitionend', () => {
+            message.remove();
+        });
+    }, duration);
+}
+
+// ------- LOCAL STORAGE HANDLING -------
+function saveData() {
+    localStorage.setItem('units', JSON.stringify(units));
+    localStorage.setItem('calls', JSON.stringify(calls));
+    localStorage.setItem('callId', JSON.stringify(callId));
+    localStorage.setItem('settings', JSON.stringify(settings));
+}
+
+function loadData() {
+    const savedUnits = localStorage.getItem('units');
+    const savedCalls = localStorage.getItem('calls');
+    const savedCallId = localStorage.getItem('callId');
+    const savedSettings = localStorage.getItem('settings');
+
+    if (savedUnits) units = JSON.parse(savedUnits);
+    if (savedCalls) calls = JSON.parse(savedCalls);
+    if (savedCallId) callId = JSON.parse(savedCallId);
+    if (savedSettings) settings = JSON.parse(savedSettings);
+}
+
+function resetDashboard() {
+    const confirmation = confirm('Are you sure you would like to the dashboard data?');
+    if (!confirmation) return;
+
+    units = []; bolos = []; calls = [];
+    selectedCall = 0;
+    saveData();
+    renderCalls(); renderUnits();
+    clearEditor();
+    showMessage("success", "Successfully completed the dashboard reset.", 3000)
+}
+
+window.onload = function () {
+    loadData();
+    renderUnits();
+    renderCalls();
+};
+
+function updateFooterStats() {
+    document.getElementById('footer-units').textContent = units.length;
+    document.getElementById('footer-calls').textContent = calls.length;
+    document.getElementById('footer-bolos').textContent = bolos.length;
+}
+
+// ------- CALLS -------
+document.getElementById('clear-editor-btn').addEventListener('click', clearEditor);
+document.getElementById('create-call-btn').addEventListener('click', createCall);
+document.getElementById('update-call-btn').addEventListener('click', updateCall);
+
+function createCall() {
+    let title = document.getElementById('id-title-input').value;
+    let location = document.getElementById('id-location-input').value;
+    let priority = document.getElementById('id-priority-input').value;
+    let description = document.getElementById('id-description-input').value;
+
+    if (title && location && priority !== "N/A") {
+        callId++
+        const newCall = {
+            id: callId,
+            title: title,
+            location: location,
+            units: [],
+            priority: priority,
+            description: description
+        };
+
+        calls.push(newCall);
+        clearEditor();
+        renderCalls();
+        saveData();
+        showMessage("success", `New Dispatch #${callId} successfully created!`, 3000)
+    } else {
+        showMessage("warning", "Ensure you fill all fields, however description is optional!", 4000)
+    }
+}
+
+function renderCalls() {
+    updateFooterStats();
+    const calls_body = document.getElementById('q-table__calls-body');
+    const nonActive = document.getElementById('no-active-calls');
+
+    calls_body.innerHTML = calls.map((call, index) =>
+        `
+        <tr>
+            <td>
+                <button class="button"
+                    style="background-color: #3b6cec; height: auto; width: 100%; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
+                    id="select-call-id"
+                    onclick="selectCall(${index})">
+                    ${call.id}
+                </button>
+            </td>
+
+            <td>
+                ${call.title}
+            </td>
+
+            <td>
+                ${call.location}
+            </td>
+
+            <td>
+                ${call.units.join(", ")}
+            </td>
+
+            <td>
+                ${call.priority}
+            </td>
+
+            <td style="text-align: left;">
+                <button class="button"
+                    style="border: 2px solid rgb(236, 59, 59); height: 22px; width: 22px; border-radius: 1em; padding: 5px; font-size: 18px;"
+                    id="add-call-btn" onclick="deleteCall(${index})">
+                    <img src="assets/icons/trash_vector.png" style="height: 12px;">
+                </button>
+            </td>
+        </tr>
+    `
+    ).join('');
+
+    if (calls.length > 0) {
+        nonActive.style.display = 'none';
+    } else {
+        nonActive.style.display = 'block';
+    }
+}
+
+function updateCall() {
+    let call = calls.find(call => call.id === selectedCall);
+    if (!call) { 
+        return;
+     } //If call isn't found
+
+    let title = document.getElementById('id-title-input').value;
+    let location = document.getElementById('id-location-input').value;
+    let priority = document.getElementById('id-priority-input').value;
+    let description = document.getElementById('id-description-input').value;
+
+    if (title && location && priority !== "N/A") {
+        call.title = title;
+        call.location = location;
+        call.priority = priority;
+        call.description = description;
+
+        renderCalls();
+        saveData();
+        showMessage("message", `Dispatch #${selectedCall} successfully updated!`, 3000)
+    } else {
+        showMessage("warning", "Ensure you fill all fields, however description is optional!", 4000)
+    }
+
+    renderCalls();
+    saveData();
+}
+
+function deleteCall(index) {
+    if (!isShiftPressed) {
+        const confirmation = confirm('Are you sure you want to delete this call? This cannot be undone.');
+        if (!confirmation) return;
+    }
+
+    if (calls[index].id == selectedCall) { clearEditor(); }
+
+    calls.splice(index, 1);
+
+    renderCalls();
+    saveData();
+}
+
+function selectCall(index) {
+    let call = calls[index]
+    selectedCall = call.id;
+    document.getElementById('dispatch-title-id').textContent = `DISPATCH: #${selectedCall}`;
+
+    document.getElementById('id-title-input').value = call.title;
+    document.getElementById('id-location-input').value = call.location;
+    document.getElementById('id-priority-input').value = call.priority;
+    document.getElementById('id-description-input').value = call.description;
+
+    document.getElementById('attached-units-display').textContent = `ATTACHED UNITS: ${call.units.join(", ")}`;
+
+    document.getElementById('update-call-btn').style.display = 'block';
+    document.getElementById('create-call-btn').style.display = 'none';
+}
+
+function clearEditor() {
+    selectedCall = 0;
+    document.getElementById('dispatch-title-id').textContent = "NEW DISPATCH";
+    document.getElementById('attached-units-display').textContent = "ATTACHED UNITS:";
+
+    document.getElementById('id-title-input').value = "";
+    document.getElementById('id-location-input').value = "";
+    document.getElementById('id-priority-input').value = "N/A";
+    document.getElementById('id-description-input').value = "";
+
+    document.getElementById('update-call-btn').style.display = 'none';
+    document.getElementById('create-call-btn').style.display = 'block';
+}
+
+// ------- UNITS -------
+document.getElementById('add-unit-btn').addEventListener('click', addUnit);
+
+function addUnit() {
+    if (units.length <= 15) {
+        const newUnit = {
+            unitNumber: '',
+            name: '',
+            department: 'N/A',
+            status: 'N/A'
+        };
+
+        units.push(newUnit);
+        renderUnits();
+    } else {
+        showMessage("warning", "Uh oh, cannot add more than 15 units at once!", 4000)
+    }
+
+    saveData();
+}
+
+function renderUnits() {
+    updateFooterStats();
+
+    const units_body = document.getElementById('q-table__units-body');
+    const nonActive = document.getElementById('no-active-units');
+
+    units_body.innerHTML = units.map((unit, index) =>
+        `
+        <tr>
+            <td>
+                <input onchange="updateUnit(${index}, 'unitNumber', this.value)" type="text" placeholder="XXX" value="${unit.unitNumber}">
+            </td>
+
+            <td>
+                <input onchange="updateUnit(${index}, 'name', this.value)" type="text" placeholder="NOT ASSIGNED" value="${unit.name}">
+            </td>
+
+            <td>
+                <select onchange="updateUnit(${index}, 'department', this.value)" style="color: ${getDepartmentColor(unit.department)}">
+                    <option value="N/A" class="status-na" ${unit.department === 'N/A' ? 'selected' : ''}>N/A</option>
+                    <option value="FVMPD" class="fvmpd" ${unit.department === 'FVMPD' ? 'selected' : ''}>FVMPD</option>
+                    <option value="NPS" class="nps" ${unit.department === 'NPS' ? 'selected' : ''}>NPS</option>
+                    <option value="OUSO" class="ouso" ${unit.department === 'OUSO' ? 'selected' : ''}>OUSO</option>
+                    <option value="WSP" class="wsp" ${unit.department === 'WSP' ? 'selected' : ''}>WSP</option>
+                    <option value="GVFD" class="gvfd" ${unit.department === 'GVFD' ? 'selected' : ''}>GVFD</option>
+                    <option value="WISDOT" class="wisdot" ${unit.department === 'WISDOT' ? 'selected' : ''}>WISDOT</option>
+                </select>
+            </td>
+
+            <td>
+                <select onchange="updateUnit(${index}, 'status', this.value)" style="color: ${getStatusColor(unit.status)}">
+                    <option value="N/A" class="status-na" ${unit.status === 'N/A' ? 'selected' : ''}>N/A</option>
+                    <option value="BUSY" class="status-busy" ${unit.status === 'BUSY' ? 'selected' : ''}>BUSY</option>
+                    <option value="UNAVAILABLE" class="status-unavailable" ${unit.status === 'UNAVAILABLE' ? 'selected' : ''}>UNAVAILABLE</option>
+                    <option value="AVAILABLE" class="status-available" ${unit.status === 'AVAILABLE' ? 'selected' : ''}>AVAILABLE</option>
+                    <option value="ENROUTE" class="status-enroute" ${unit.status === 'ENROUTE' ? 'selected' : ''}>ENROUTE</option>
+                    <option value="ON SCENE" class="status-on-scene" ${unit.status === 'ON SCENE' ? 'selected' : ''}>ON SCENE</option>
+                    <option value="PRIORITY" class="status-priority" ${unit.status === 'PRIORITY' ? 'selected' : ''}>PRIORITY</option>
+                </select>
+            </td>
+
+            <td style="text-align: left; display: flex; gap: 10px;">
+                <button class="button"
+                    style="border: 2px solid #26a69a; height: 22px; width: 22px; border-radius: 1em; padding: 5px; font-size: 18px;"
+                    onclick="assignUnit(${index})">
+                    <img src="assets/icons/human_vector.png" style="height: 12px;">
+                </button>
+
+                <button class="button"
+                    style="border: 2px solid rgb(236, 59, 59); height: 22px; width: 22px; border-radius: 1em; padding: 5px; font-size: 18px;"
+                    onclick="deleteUnit(${index})">
+                    <img src="assets/icons/trash_vector.png" style="height: 12px;">
+                </button>
+            </td>
+        </tr>
+    `
+    ).join('');
+
+    if (units.length > 0) {
+        nonActive.style.display = 'none';
+    } else {
+        nonActive.style.display = 'block';
+    }
+}
+
+function assignUnit(index) {
+    let unitNumber = units[index].unitNumber
+    
+    //Find selected call & it's array index and attach the unit to it for data (Toggle so if already there, remove)
+    let call = calls.find(call => call.id === selectedCall);
+    if (!call || !unitNumber) { return } //If call isn't found
+
+    if(call.units.includes(unitNumber)) {
+        let indexOfUnitNumber = call.units.indexOf(unitNumber);
+        call.units.splice(indexOfUnitNumber, 1);
+        showMessage("warning", `Unit ${unitNumber} has been dettached from Call #${call.id}`)
+    } else {
+        call.units.push(unitNumber);
+        showMessage("message", `Unit ${unitNumber} has been attached Call #${call.id}`)
+    }
+
+    selectCall(calls.findIndex(call => call.id === selectedCall));
+    renderCalls();
+    saveData();
+}
+
+function updateUnit(index, key, value) {
+    units[index][key] = value;  // Update the specific key of the unit
+    const statusSelect = document.querySelector(`#q-table__units-body tr:nth-child(${index + 1}) td:nth-child(4) select`);
+    const departmentSelect = document.querySelector(`#q-table__units-body tr:nth-child(${index + 1}) td:nth-child(3) select`);
+
+    if (key === "status") {
+        statusSelect.style.color = getStatusColor(value);
+    } else if (key === "department") {
+        departmentSelect.style.color = getDepartmentColor(value);
+    }
+
+    saveData();
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'N/A':
+            return '#dedee7';
+        case 'BUSY':
+            return '#ed7315';
+        case 'UNAVAILABLE':
+            return '#980919';
+        case 'AVAILABLE':
+            return '#26a69a';
+        case 'ENROUTE':
+            return '#2652a4';
+        case 'ON SCENE':
+            return '#26a642';
+        case 'PRIORITY':
+            return 'red';
+        case 'PANIC':
+            return '#910606';
+        default:
+            return '#dedee7';
+    }
+}
+
+function getDepartmentColor(dept) {
+    switch (dept) {
+        case 'N/A':
+            return '#dedee7';
+        case 'FVMPD':
+            return '#0031a5';
+        case 'NPS':
+            return '#127501';
+        case 'OUSO':
+            return '#866551';
+        case 'WSP':
+            return '#476fb4';
+        case 'GVFD':
+            return '#9b3a3a';
+        case 'WISDOT':
+            return '#e49310';
+        default:
+            return '#dedee7';
+    }
+}
+
 
 // Track if Shift key is pressed
 let isShiftPressed = false;
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Shift') {
-    isShiftPressed = true;
-  }
+    if (event.key === 'Shift') {
+        isShiftPressed = true;
+    }
 });
 
 document.addEventListener('keyup', (event) => {
-  if (event.key === 'Shift') {
-    isShiftPressed = false;
-  }
+    if (event.key === 'Shift') {
+        isShiftPressed = false;
+    }
 });
-
-// Retrieve version info from localStorage
-const localInfo = JSON.parse(localStorage.getItem("localInfo")) || { version: "" };
-
-// Function to toggle changelog menu visibility
-function toggleChangeLogMenu() {
-  const changelogMenu = document.getElementById("ChangelogMenu");
-  changelogMenu.style.display = changelogMenu.style.display === "none" ? "block" : "none";
-}
-
-// Check for version mismatch
-if (websiteInfo.version !== localInfo.version) {
-  toggleChangeLogMenu(); // Show changelog menu
-  localStorage.setItem("localInfo", JSON.stringify(websiteInfo)); // Update stored version
-}
-
-// Page Navigation with Active Button
-function showPage(page, button) {
-  document.querySelectorAll('.section').forEach((section) => {
-    section.style.display = 'none';
-  });
-  document.getElementById(`${page}-page`).style.display = 'block';
-
-  // Update button active styles
-  if (button) { // Ensure the button exists
-    document.querySelectorAll('.status-btn').forEach((btn) => btn.classList.remove('active'));
-    button.classList.add('active');
-  }
-}
-
-// --- ZULU ---
-function updateZuluTime() {
-  const now = new Date();
-  const hours = String(now.getUTCHours()).padStart(2, '0');
-  const minutes = String(now.getUTCMinutes()).padStart(2, '0');
-  const seconds = String(now.getUTCSeconds()).padStart(2, '0');
-  document.getElementById('zulu-time').textContent = `${hours}:${minutes}:${seconds}`;
-}
-
-// Update the time every second
-setInterval(updateZuluTime, 1000);
-// Initialize the time immediately
-updateZuluTime();
-
-// --- UNITS ---
-document.getElementById('add-unit-btn').addEventListener('click', addUnit);
-
-function addUnit() {
-  // Create a new default unit
-  const newUnit = {
-    username: '',       // Empty by default
-    callsign: '',       // Empty by default
-    dept: 'N/A',        // Default department
-    status: 'N/A',      // Default status
-    assignedCall: '',   // No call assigned by default
-  };
-
-  // Add the new unit to the array
-  units.push(newUnit);
-
-  // Render the updated units table
-  renderUnits();
-
-  // Save the updated data to localStorage
-  saveData();
-}
-
-function updateUnit(index, key, value) {
-  units[index][key] = value;  // Update the specific key of the unit
-
-  // Get the select element for the department
-  const deptSelect = document.querySelector(`#units-table-body tr:nth-child(${index + 1}) td select`);
-  const statusSelect = document.querySelector(`#units-table-body tr:nth-child(${index + 1}) td:first-child`);
-
-  // Update the department background color
-  if (key === 'dept') {
-    deptSelect.classList.remove(...deptSelect.classList); // Remove any existing classes
-    deptSelect.classList.add(value);  // Add the new class based on selected dept
-  } else if (key === 'status') {
-    // If the status is updated, ensure the department class is still set correctly
-    const currentDept = units[index].dept;
-    deptSelect.classList.remove(...deptSelect.classList); // Remove any existing classes
-    deptSelect.classList.add(currentDept);  // Re-add the current department class
-
-    // Update the border color based on the new status
-    statusSelect.style.borderLeftColor = getStatusColor(value);
-  }
-
-  saveData();  // Save the updated data
-}
-
-
-function getStatusColor(status) {
-  switch (status) {
-    case 'N/A':
-      return 'transparent';
-    case '10-6':
-      return '#121212';
-    case '10-5':
-      return '#f2a01b';
-    case '10-7':
-      return '#ff4545';
-    case '10-8':
-      return '#56d938';
-    case '10-11':
-      return '#b347e6';
-    case '10-23':
-      return '#102640';
-    case '10-80':
-      return '#f51111';
-    case '10-97':
-      return '#4a47e6';
-    case 'Panic':
-      return '#910606';
-    default:
-      return 'transparent';
-  }
-}
-
-function renderUnits() {
-  const tbody = document.getElementById('units-table-body');
-  tbody.innerHTML = units
-    .map(
-      (unit, index) => `
-      <tr>
-        <td style="border-left: 3px solid ${getStatusColor(unit.status)};">
-          <input style="background-color:#444444;border:0;border-radius:0;" type="text" 
-                 class="callsign-input" 
-                 value="${unit.username}" 
-                 onchange="updateUnit(${index}, 'username', this.value)" 
-                 placeholder="Enter Username">
-        </td>
-        <td>
-          <input style="background-color:#444444;border:0;border-radius:0;" type="text" 
-                 class="callsign-input" 
-                 value="${unit.callsign}" 
-                 onchange="updateUnit(${index}, 'callsign', this.value)" 
-                 placeholder="Enter Callsign">
-        </td>
-        <td>
-          <select onchange="updateUnit(${index}, 'dept', this.value)" class="${unit.dept}">
-            <option value="N/A" ${unit.dept === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="FVMPD" ${unit.dept === 'FVMPD' ? 'selected' : ''}>FVMPD</option>
-            <option value="NPS" ${unit.dept === 'NPS' ? 'selected' : ''}>NPS</option>
-            <option value="OUSO" ${unit.dept === 'OUSO' ? 'selected' : ''}>OUSO</option>
-            <option value="WSP" ${unit.dept === 'WSP' ? 'selected' : ''}>WSP</option>
-            <option value="GVFD" ${unit.dept === 'GVFD' ? 'selected' : ''}>GVFD</option>
-            <option value="WisDOT" ${unit.dept === 'WisDOT' ? 'selected' : ''}>WisDOT</option>
-          </select>
-        </td>
-        <td>
-          <select style="background-color:#444444;border:0;border-bottom:1.5px solid #828282;border-radius:0;" onchange="updateUnit(${index}, 'status', this.value)">
-            <option value="N/A" ${unit.status === 'N/A' ? 'selected' : ''}>N/A</option>
-            <option value="10-5" ${unit.status === '10-5' ? 'selected' : ''}>10-5 Meal Break</option>
-            <option value="10-6" ${unit.status === '10-6' ? 'selected' : ''}>10-6 Busy</option>
-            <option value="10-7" ${unit.status === '10-7' ? 'selected' : ''}>10-7 Unavailable</option>
-            <option value="10-8" ${unit.status === '10-8' ? 'selected' : ''}>10-8 Available</option>
-            <option value="10-11" ${unit.status === '10-11' ? 'selected' : ''}>10-11 Traffic</option>
-            <option value="10-23" ${unit.status === '10-23' ? 'selected' : ''}>10-23 On Scene</option>
-            <option value="10-80" ${unit.status === '10-80' ? 'selected' : ''}>10-80 Pursuit</option>
-            <option value="10-97" ${unit.status === '10-97' ? 'selected' : ''}>10-97 Enroute</option>
-            <option value="Panic" ${unit.status === 'Panic' ? 'selected' : ''}>Panic</option>
-          </select>
-        </td>
-
-        <td>
-          <select style="background-color:#444444;border:0;border-bottom:1.5px solid #828282;border-radius:0;" onchange="updateUnit(${index}, 'assignedCall', this.value)">
-            <option value="" ${unit.assignedCall === '' ? 'selected' : ''}>None</option>
-            ${calls
-              .map(call => `
-                <option value="${call.id}" ${String(unit.assignedCall) === String(call.id) ? 'selected' : ''}>
-                  ${call.id} - ${call.type}
-                </option>
-              `)
-              .join('')}
-          </select>
-        </td>
-
-        <td>
-          <button style="padding: 0px; background-color: transparent;" onclick="deleteUnit(${index})">
-            <img src="assets/delete-icon.png" alt="Delete" style="width: 24px; height: 24px;">
-          </button>
-        </td>
-      </tr>
-    `
-    )
-    .join('');
-}
 
 function deleteUnit(index) {
-  if (!isShiftPressed) {
-    const confirmation = confirm('Are you sure you want to delete this unit? This cannot be undone.');
-    if (!confirmation) return;
-  }
-  units.splice(index, 1);
-  renderUnits();
-  saveData();  // Save data to localStorage after deleting a unit
-}
-
-// --- Calls ---
-function renderCalls() {
-  const tbody = document.getElementById('calls-table-body');
-  tbody.innerHTML = calls
-    .map(
-      (call, index) => `
-        <tr>
-          <td>${call.id}</td>
-          <td>${call.type}</td>
-          <td>${call.priority}</td>
-          <td>${call.location}</td>
-          <td>${call.description}</td>
-
-          <td>
-            <button style="padding: 0px; margin-right: 5px; background-color: transparent;" class="edit-call-btn" onclick="editCall(${index})">
-              <img src="assets/edit-icon.png" alt="Edit" style="width: 24px; height: 24px;">
-            </button>
-
-            <button style="padding: 0px; background-color: transparent;" onclick="deleteCall(${index})">
-              <img src="assets/delete-icon.png" alt="Delete" style="width: 24px; height: 24px;">
-            </button>
-          </td>
-
-        </tr>
-      `
-    )
-    .join('');
-
-  renderUnits();
-}
-
-function generateUniqueCallId() {
-  const min = 1000; // Set your minimum value
-  const max = 9999; // Set your maximum value
-  let id = Math.floor(Math.random() * (max - min + 1)) + min; // Generate a random number between min and max
-
-  // Check if the id already exists
-  while (calls.some(call => call.id === id)) {
-    id = Math.floor(Math.random() * (max - min + 1)) + min; // Generate a new ID if the current one exists
-  }
-
-  return id;
-}
-
-document.getElementById('create-call-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const type = document.getElementById('call-type').value;
-  const priority = document.getElementById('call-priority').value;
-  const location = document.getElementById('call-location').value;
-  const description = document.getElementById('call-description').value;
-  const id = generateUniqueCallId(); // Get a unique ID
-  calls.push({ id, type, priority, location, description });
-  renderCalls();
-  saveData();  // Save data to localStorage after adding a call
-  e.target.reset();
-  showPage('dashboard');
-});
-
-function deleteCall(index) {
-  if (!isShiftPressed) {
-    const confirmation = confirm('Are you sure you want to delete this call? This cannot be undone.');
-    if (!confirmation) return;
-  }
-  calls.splice(index, 1);
-  renderCalls();
-  renderUnits();  // Update the units table
-  saveData();  // Save data to localStorage after deleting a call
-}
-
-// --- BOLOs ---
-function renderBolos() {
-  const tbody = document.getElementById('bolos-table-body');
-  tbody.innerHTML = bolos
-    .map(
-      (bolo, index) => `
-      <tr>
-        <td>${bolo.description}</td>
-        <td>${bolo.lastSeen}</td>
-        <td>${bolo.reason}</td>
-
-        <td>
-          <button style="padding: 0px; margin-right: 5px; background-color: transparent;" class="edit-bolo-btn" onclick="editBolo(${index})">
-            <img src="assets/edit-icon.png" alt="Edit" style="width: 24px; height: 24px;">
-          </button>
-
-          <button style="padding: 0px; background-color: transparent;" onclick="deleteBolo(${index})">
-            <img src="assets/delete-icon.png" alt="Delete" style="width: 24px; height: 24px;">
-          </button>
-        </td>
-      </tr>
-    `
-    )
-    .join('');
-}
-
-document.getElementById('create-bolo-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const description = document.getElementById('bolo-description').value;
-  const lastSeen = document.getElementById('bolo-last-seen').value;
-  const reason = document.getElementById('bolo-reason').value;
-  bolos.push({ description, lastSeen, reason });
-  renderBolos();
-  saveData();  // Save data to localStorage after adding a bolo
-  e.target.reset();
-  showPage('dashboard');
-});
-
-function deleteBolo(index) {
-  if (!isShiftPressed) {
-    const confirmation = confirm('Are you sure you want to delete this bolo? This cannot be undone.');
-    if (!confirmation) return;
-  }
-  bolos.splice(index, 1);
-  renderBolos();
-  saveData();  // Save data to localStorage after deleting a bolo
-}
-
-function editCall(index) {
-  const call = calls[index];
-
-  // Fill form inputs with the selected call's data
-  document.getElementById('edit-call-type').value = call.type;
-  document.getElementById('edit-call-priority').value = call.priority;
-  document.getElementById('edit-call-location').value = call.location;
-  document.getElementById('edit-call-description').value = call.description;
-
-  // Show the edit call page
-  showPage('edit-call');
-
-  // Handle form submission
-  const editCallForm = document.getElementById('edit-call-form');
-  editCallForm.onsubmit = (e) => {
-    e.preventDefault();
-
-    // Update the call record with the new values
-    call.type = document.getElementById('edit-call-type').value;
-    call.priority = document.getElementById('edit-call-priority').value;
-    call.location = document.getElementById('edit-call-location').value;
-    call.description = document.getElementById('edit-call-description').value;
-
-    // Render updated calls and return to dashboard
-    renderCalls();
-    saveData();
-    showPage('dashboard');
-  };
-}
-
-function editBolo(index) {
-  const bolo = bolos[index];
-
-  // Fill form inputs with the selected BOLO's data
-  document.getElementById('edit-bolo-description').value = bolo.description;
-  document.getElementById('edit-bolo-last-seen').value = bolo.lastSeen;
-  document.getElementById('edit-bolo-reason').value = bolo.reason;
-
-  // Show the edit BOLO page
-  showPage('edit-bolo');
-
-  // Handle form submission
-  const editBoloForm = document.getElementById('edit-bolo-form');
-  editBoloForm.onsubmit = (e) => {
-    e.preventDefault();
-
-    // Update the BOLO record with the new values
-    bolo.description = document.getElementById('edit-bolo-description').value;
-    bolo.lastSeen = document.getElementById('edit-bolo-last-seen').value;
-    bolo.reason = document.getElementById('edit-bolo-reason').value;
-
-    // Render updated BOLOs and return to dashboard
-    renderBolos();
-    saveData();
-    showPage('dashboard');
-  };
-}
-
-
-// --- Local Storage Functions ---
-
-// Save data to localStorage
-function saveData() {
-  localStorage.setItem('units', JSON.stringify(units));
-  localStorage.setItem('calls', JSON.stringify(calls));
-  localStorage.setItem('bolos', JSON.stringify(bolos));
-}
-
-// Load data from localStorage
-function loadData() {
-  const savedUnits = localStorage.getItem('units');
-  const savedCalls = localStorage.getItem('calls');
-  const savedBolos = localStorage.getItem('bolos');
-
-  if (savedUnits) units = JSON.parse(savedUnits);
-  if (savedCalls) calls = JSON.parse(savedCalls);
-  if (savedBolos) bolos = JSON.parse(savedBolos);
-}
-
-// Load data on page load
-window.onload = function () {
-  loadData();  // Load the data from localStorage
-  renderUnits();
-  renderCalls();
-  renderBolos();
-};
-
-// --- Clear Page Functionality ---
-function clearPage() {
-  const confirmation = confirm('Are you sure you want to clear all data? This cannot be undone.');
-  if (confirmation) {
-    // Clear all data arrays
-    units = [];
-    calls = [];
-    bolos = [];
-
-    // Render empty tables
+    if (!isShiftPressed) {
+        const confirmation = confirm('Are you sure you want to delete this unit? This cannot be undone.');
+        if (!confirmation) return;
+    }
+    units.splice(index, 1);
     renderUnits();
-    renderCalls();
-    renderBolos();
 
-    // Clear localStorage
-    localStorage.removeItem('units');
-    localStorage.removeItem('calls');
-    localStorage.removeItem('bolos');
-  }
+    saveData();
 }
 
-document.getElementById('clear-page').addEventListener('click', clearPage);
+//SETTINGS
+function toggleSettingsFrame() {
+    let settingsFrame = document.getElementById('settings-menu')
+    settingsFrame.style.display = settingsFrame.style.display === "none" ? "block" : "none"; 
+}
