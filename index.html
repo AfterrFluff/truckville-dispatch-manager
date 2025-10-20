@@ -1,314 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>OCC Dispatch | .gg/truckville</title>
-    <link rel="icon" href="assets/favicon.ico" />
-    <link rel="stylesheet" href="styles.css">
-    <script src="app.js" defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Truckville | OCC Dispatch Portal</title>
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-    <div class="app">
-        <!--SERVER RESPONSE-->
-        <div class="response-bg" id="response-bg">
-        </div>
+  <!-- TOASTS -->
+  <div class="toast-wrap" id="toasts"></div>
 
-        <!-- CHANGE LOGS -->
-        <div class="popup-backdrop" id="popup-backdrop"></div>
-        <div class="changelog__menu" id="changelog-menu" style="display: none;">
-            <div class="frame__topbar">
-                <div>
-                    <span id="changelog_ver">
-                        Update 0.0
-                    </span>
-                    is now live
-                </div>
-                <button class="changelog__close-btn" onclick="closeChangelogs()">✖</button>
-            </div>
-
-            <div class="content">
-                <h2 id="version-heading"></h2>
-
-                <h3>Welcome to the newest Truckville OCC Dispatch update!</h3>
-                This update marks an important milestone for our Dispatch Manager. Of course, it's still in beta, but we
-                did not have amazing visuals, new functionality and responsive interface like we do now.
-                <ul>
-                    <li>Rebuilt website from ground up!</li>
-                    <li>Custom system messages!</li>
-                    <li>Redesigned call functionality!</li>
-                    <li>Access the Greenville map in-app!</li>
-                    <li>And so much more behind-the-scenes changes!</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="setting__menu" id="settings-menu" style="display: none;">
-            <div class="frame__topbar">
-                <span>
-                    Settings
-                </span>
-                <button class="changelog__close-btn" onclick="toggleSettingsFrame()">✖</button>
-            </div>
-
-            <div class="setting__toggles">
-                <!--<div class="togDiv">
-                    <input style="width: 20px; height: 20px;" type="checkbox" id="setting__tog-unitAvail" onchange="refreshSettings()">
-                    Set unit status to available by default
-                </div>-->
-                This feature is currently unavailable and is in the works.
-            </div>
-        </div>
-
-        <header class="header">
-            <div class="header-left">
-                <img class="header__logo" src="assets/favicon.ico" alt="Logo">
-
-                <div class="header__text">
-                    <b>OCC DISPATCH</b>
-                    .gg/truckville
-                </div>
-
-                <div class="header__vertical-line"></div>
-
-                <!--Buttons-->
-                <div class="header__section__buttons">
-                    <button class="button header__btn header__selected-btn" style="height: auto; width: auto;"
-                        onclick="showPage('dashboard', this)">
-                        <img class="header-section__button-logo" src="assets/icons/dash_vector.png">
-                        Dashboard
-                    </button>
-
-                    <button class="button header__btn" style="height: auto; width: auto;"
-                        onclick="showPage('map', this)">
-                        <img class="header-section__button-logo" src="assets/icons/map.png">
-                        Map
-                    </button>
-
-                    <button class="button header__btn" style="height: auto; width: auto;"
-                        onclick="showPage('about', this)">
-                        <img class="header-section__button-logo" src="assets/icons/about_vector.png">
-                        About Us
-                    </button>
-                </div>
-            </div>
-
-            <div class="header-right">
-                <!--ZULU-->
-                <div class="zulu-display" id="zulu-display">0:00:00</div>
-                <div class="header__vertical-line" style="margin:0px;"></div>
-
-                <!--Right Buttons-->
-                <a class="button" target="_blank" href="https://github.com/AfterrFluff/truckville-dispatch-manager">
-                    <img class="header-section__button-logo" src="assets/icons/github_logo.png" alt="GitHub">
-                </a>
-
-                <a class="button" target="_blank" href="https://discord.gg/truckville">
-                    <img class="header-section__button-logo" src="assets/icons/discord_logo.png" alt="Discord">
-                </a>
-
-                <a class="button" onclick="toggleSettingsFrame()">
-                    <img class="header-section__button-logo" src="assets/icons/setting_vector.png" alt="Settings">
-                </a>
-            </div>
-        </header>
-
-        <div class="page-container" id="dashboard-page">
-            <div class="page-block">
-                <div class="dispatch-parent">
-                    <div class="dispatch-subsection" style="grid-row: span 2;">
-                        <div class="dispatch-block_title">ACTIVE UNITS
-                            <button class="button"
-                                style="border: 2px solid #3b6cec; height: 22px; width: 22px; border-radius: 1em; padding: 5px; font-size: 18px;"
-                                id="add-unit-btn">
-                                +
-                            </button>
-                        </div>
-
-                        <table class="q-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 150px;">UNIT NUMBER</th>
-                                    <th>NAME</th>
-                                    <th style="width: 125px;">DEPARTMENT</th>
-                                    <th style="width: 175px;">STATUS</th>
-                                    <th style="width: 70px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="q-table__units-body">
-                                <!-- DYNAMIC -->
-                            </tbody>
-                        </table>
-
-                        <div id="no-active-units"
-                            style="color: rgba(216, 220, 238, 0.365); margin-top: 10px; text-align: center;">NO ACTIVE
-                            UNITS
-                        </div>
-                    </div>
-                    <div class="dispatch-subsection">
-                        <div class="dispatch-block_title" id="dispatch-call-title"
-                            style="justify-content: space-between;">
-                            <div id="dispatch-title-id">NEW DISPATCH</div>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="button"
-                                    style="border: 2px solid rgb(236, 59, 59); height: auto; width: auto; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
-                                    id="clear-editor-btn">
-                                    CLEAR EDITOR
-                                </button>
-
-                                <button class="button"
-                                    style="border: 2px solid #26a69a; height: auto; width: auto; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
-                                    id="create-call-btn">
-                                    CREATE CALL
-                                </button>
-
-                                <button class="button"
-                                    style="display:none; border: 2px solid #ff9419; height: auto; width: auto; border-radius: 10px; padding: 5px 10px; font-size: 11px;"
-                                    id="update-call-btn">
-                                    UPDATE CALL
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="margin-bottom: 8px;" id="attached-units-display">
-                            ATTACHED UNITS:
-                        </div>
-                        <div>
-                            <div style="display: flex; margin: 10px 0px; gap: 10px;">
-                                <input id="id-title-input" style="width: 150px;" class="call-input" placeholder="TITLE">
-                                <input id="id-location-input" class="call-input" placeholder="LOCATION">
-                                <select id="id-priority-input" style="width: 150px;" class="call-input">
-                                    <option value="N/A" disabled selected>PRIORITY</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; margin: 10px 0px; gap: 10px;">
-                                <textarea id="id-description-input" class="call-input call-input__ta"
-                                    placeholder="DESCRIPTION"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dispatch-subsection">
-                        <div class="dispatch-block_title">ACTIVE SCENES</div>
-
-                        <table class="q-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 60px;">ID</th>
-                                    <th>TITLE</th>
-                                    <th>LOCATION</th>
-                                    <th>UNITS</th>
-                                    <th style="width: 100px;">PRIORITY</th>
-                                    <th style="width: 40px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="q-table__calls-body">
-                                <!-- DYNAMIC -->
-                            </tbody>
-                        </table>
-
-                        <div id="no-active-calls"
-                            style="color: rgba(216, 220, 238, 0.365); margin-top: 10px; text-align: center;">NO ACTIVE
-                            SCENES/CALLS</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="page-container" id="map-page" style="display: none;">
-            <div class="page-block map"></div>
-        </div>
-
-        <div class="page-container" id="about-page" style="display: none;">
-            <div class="page-block">
-                <div class="page-block_title">About</div>
-                Truckville's OCC Dispatch Manager is a free, volunteer-driven initiative designed to streamline
-                operations for OCC Telecommunicators. Our goal is to provide a reliable and user-friendly tool to
-                enhance efficiency and effectiveness in dispatch management.
-                <br><br>
-                This project is made possible through the use of public resources and contributions from open-source
-                platforms. In the spirit of collaboration, it is also open-source and available on my GitHub page.
-                Should you encounter any issues or have feature requests, feel free to reach out to me on Discord
-                (@afterrfluff) or submit a request on GitHub.
-
-                If you would like to join our community server and enhance your role-playing experience with quality,
-                check out Truckville using this link:
-                <a href="https://discord.gg/truckville" target="_blank"
-                    style="color: #3b6cec;">https://discord.gg/truckville
-                </a>
-
-                <br><br><br><br>
-
-                <div class="page-block_title">Privacy Policy</div>
-                <h3>1. Information We Collect</h3>
-                <br>
-                We do not directly collect personal information from our users. However, we may utilize local
-                storage in your browser to enhance your user experience.
-                The data stored locally may include preferences, settings, and session data to ensure seamless
-                interaction with our platform. The data stored in your local storage is accessible only within your
-                browser and is not shared with any external servers or third parties.
-
-                <br><br>
-                <h3>2. Data Security</h3>
-                <br>
-                We prioritize the security of your data. By using local storage, we limit the risk of sensitive data
-                exposure since this information remains on your device and is not transmitted over the internet.
-                Nevertheless, we recommend using secure devices and maintaining up-to-date browser security measures.
-
-                <br><br>
-                <h3>3. Policy Updates</h3>
-                <br>
-                We may update this Privacy Policy from time to time to reflect changes in our practices or for other
-                operational, legal, or regulatory reasons. Any changes will be communicated clearly on this page, so we
-                encourage you to review it periodically.
-
-            </div>
-        </div>
-
-        <footer class="footer">
-            <p class="footer__ver" id="ver">v1.0.0</p>
-            <div class="footer__vertical-line"></div>
-            <p>Property of Truckville</p>
-            <div class="footer__vertical-line"></div>
-            <p>PC Only (Mobile Unsupported)</p>
-            <div class="footer__vertical-line"></div>
-
-            <div class="footer__active-box">
-                <div>
-                    <span id="footer-units">
-                        0
-                    </span>
-                    units
-                </div>
-                <div class="footer__vertical-line"></div>
-                <div>
-                    <span id="footer-calls">
-                        0
-                    </span>
-                    scenes
-                </div>
-                <div class="footer__vertical-line"></div>
-                <div>
-                    <span id="footer-bolos">
-                        0
-                    </span>
-                    bolos
-                </div>
-            </div>
-
-            <div class="footer__vertical-line"></div>
-
-            <button class="button"
-                style="background-color: rgba(255, 54, 54, 0.783); height: 22px; width: auto; border-radius: 6px;"
-                onclick="resetDashboard()">
-                Reset Dashboard
-            </button>
-        </footer>
+  <!-- HEADER / NAV -->
+  <header class="header">
+    <div class="left">
+      <img class="logo" src="assets/favicon.ico" alt="OCC" width="500" height="600">
+      <nav class="nav" id="navTabs">
+        <button class="tab active" data-page="dashboard">Dashboard</button>
+        <button class="tab" data-page="bolos">BOLOs</button>
+        <button class="tab" data-page="about">About</button>
+      </nav>
+      <button class="btn ghost" id="btnChangelog">What's New</button>
     </div>
-</body>
+    <div class="right">
+      <div class="clock" id="clock">0000-00-00 00:00:00Z</div>
+      <span class="chip"><input type="checkbox" id="toggleZulu" checked> Zulu</span>
+      <button class="btn ghost" id="btnExport">Export</button>
+      <button class="btn ghost" id="btnImport">Import</button>
+      <input id="importFile" type="file" accept="application/json" class="hidden" />
+      <button class="btn ghost" id="btnSettings">Settings</button>
+      <button class="btn danger" id="btnReset">Reset</button>
+      <a class="btn brand" id="btnDiscord" href="https://discord.gg/truckville" target="_blank">Discord</a>
+    </div>
+  </header>
 
+  <!-- PAGES -->
+  <main id="pages">
+    <!-- DASHBOARD PAGE -->
+    <section data-page="dashboard" class="layout dashboard" id="dashboard-page">
+      <!-- LEFT: CALLS LIST -->
+      <aside class="card">
+        <h3>
+          Calls Board
+          <span class="toolbar">
+            <button class="btn" id="btnNewCall"><span>+ Call</span><kbd>N</kbd></button>
+            <select id="filterPriority">
+              <option value="">Priority: All</option>
+              <option value="1">Priority 1</option>
+              <option value="2">Priority 2</option>
+              <option value="3">Priority 3</option>
+            </select>
+          </span>
+        </h3>
+        <div class="inline" style="margin-bottom:8px">
+          <input id="searchCalls" placeholder="Search title/location…" />
+          <button class="btn ghost" id="btnCloseCall" title="Close selected call"><span>Delete Selected Call</span><kbd>Del</kbd></button>
+        </div>
+        <div class="list" id="callsList"></div>
+      </aside>
+
+      <!-- CENTER: CALL EDITOR + LOG -->
+      <section class="card">
+        <h3>
+          <span id="editorTitle">New Dispatch</span>
+          <span class="toolbar">
+            <button class="btn brand" id="btnCreateCall"><b>Create</b> <kbd>Ctrl</kbd><kbd>Enter</kbd></button>
+            <button class="btn warn hidden" id="btnUpdateCall"><b>Update</b> <kbd>S</kbd></button>
+            <button class="btn ghost" id="btnClearEditor">Clear</button>
+          </span>
+        </h3>
+
+        <div class="stack">
+          <div class="field"><label>Title</label><input id="fTitle" placeholder="ROBBERY / TRAFFIC STOP / MVA" /></div>
+          <div class="field"><label>Location</label><input id="fLocation" placeholder="STREET / NEAREST LAND MARK"/></div>
+          <div class="field"><label>Description</label><textarea id="fDesc" placeholder="NOTES / SUSPECT DESC / 10-CODES"></textarea></div>
+
+          <div class="inline">
+            <span class="chip">Quick codes:</span>
+            <button class="btn ghost" data-insert="10-8 AVAILABLE">10-8</button>
+            <button class="btn ghost" data-insert="10-76 ENROUTE">10-76</button>
+            <button class="btn ghost" data-insert="10-23 ON SCENE">10-23</button>
+            <button class="btn ghost" data-insert="CODE 3 (LIGHTS/SIREN)">C3</button>
+            <button class="btn ghost" data-insert="SCENE SAFE">SAFE</button>
+          </div>
+
+          <div class="inline">
+            <div class="field" style="flex:1"><label>Priority</label>
+              <select id="fPriority">
+                <option value="" disabled selected>Select…</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </div>
+            <div class="field" style="flex:2"><label>Attach Selected Units</label>
+              <button class="btn ok" id="btnAttach">Attach</button>
+              <button class="btn ghost" id="btnDetach">Detach</button>
+              <span class="muted" id="attachedCount">0 attached</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h3 style="margin-top:0">Incident Log</h3>
+          <div class="log" id="incidentLog"></div>
+        </div>
+      </section>
+
+      <!-- UNITS: FULL WIDTH UNDER CALLS/EDITOR -->
+      <aside class="card unitsWrap">
+        <h3>
+          Active Units
+          <span class="toolbar">
+            <button class="btn" id="btnAddUnit">+ Unit <kbd>U</kbd></button>
+            <select id="filterDept">
+              <option value="">DEPT: ALL</option>
+              <option value="FVMPD">FVMPD</option>
+              <option value="NPS">NPS</option>
+              <option value="OUSO">OUSO</option>
+              <option value="WSP">WSP</option>
+              <option value="GVFD">GVFD</option>
+              <option value="WISDOT">WISDOT</option>
+            </select>
+
+            <select id="filterStatus">
+              <option value="">STATUS: ALL</option>
+              <option value="AVAILABLE">AVAILABLE</option>
+              <option value="ENROUTE">ENROUTE</option>
+              <option value="ONSCENE">ONSCENE</option>
+              <option value="BUSY">BUSY</option>
+              <option value="UNAVAILABLE">UNAVAILABLE</option>
+              <option value="PRIORITY">PRIORITY</option>
+            </select>
+
+          </span>
+        </h3>
+        <div id="unitLog">
+          <table class="unitsTable">
+            <thead>
+              <tr><th style="width:0px"></th><th style="width:200px">Unit</th><th>Name</th><th>Dept</th><th>Status</th><th>For</th><th>Quick Action</th></tr>
+            </thead>
+            <tbody id="unitsTBody"></tbody>
+          </table>
+        </div>
+        <div class="muted" id="noUnits" style="text-align:center; padding:8px;">No active units</div>
+      </aside>
+    </section>
+
+    <!-- BOLOs PAGE (editor + list) -->
+    <section data-page="bolos" class="layout hidden" id="bolos-page">
+      <section class="card">
+        <h3>
+          <span id="boloEditorTitle">New BOLO</span>
+          <span class="toolbar">
+            <button class="btn brand" id="btnCreateBolo"><b>Create</b></button>
+            <button class="btn warn hidden" id="btnUpdateBolo"><b>Update</b></button>
+            <button class="btn ghost" id="btnClearBolo">Clear</button>
+          </span>
+        </h3>
+        <div class="stack">
+          <div class="field"><label>Type</label>
+            <select id="bType">
+              <option value="" disabled selected>Select…</option>
+              <option>VEHICLE</option>
+              <option>PERSON</option>
+              <option>OTHER</option>
+            </select>
+          </div>
+          <div class="field"><label>Summary</label><input id="bSummary" placeholder="BLACK SEDAN / PLATE WI. 4XK928"/></div>
+          <div class="field"><label>Last Seen</label><input id="bLastSeen" placeholder="NB TWIST RD"/></div>
+          <div class="field"><label>Notes</label><textarea id="bNotes" placeholder="DISTINGUISHING FEATURES / ASSOCIATES"></textarea></div>
+        </div>
+      </section>
+      <section class="card" style="grid-column: span 2;">
+        <h3>BOLO List</h3>
+        <div class="list" id="boloList"></div>
+      </section>
+    </section>
+
+    <!-- ABOUT PAGE -->
+    <section class="card about layout hidden" data-page="about">
+      <header class="about__hero">
+        <div class="about__pretitle">About</div>
+        <h2 class="about__title">Truckville OCC Dispatch Manager</h2>
+        <p class="about__lead">
+          A free, volunteer-built tool to streamline RP dispatch and improve session flow for OCC Telecommunicators on Roblox.
+          Built for speed, clarity, and reliability—no external APIs required.
+        </p>
+
+        <div class="about__cta">
+          <a class="btn about__btn" href="https://discord.gg/truckville" target="_blank" rel="noopener">Join Discord</a>
+          <a class="btn about__btn" href="https://github.com/AfterrFluff/truckville-dispatch-manager" target="_blank" rel="noopener">View on GitHub</a>
+        </div>
+      </header>
+
+      <div class="about__grid">
+        <section class="about__section">
+          <h3 class="about__h3">Highlights</h3>
+          <ul class="about__chips">
+            <li class="chip">Manual-first, RP friendly</li>
+            <li class="chip">Smart call editor</li>
+            <li class="chip">Enhanced dropdowns</li>
+            <li class="chip">Attach/Detach flow</li>
+            <li class="chip">Per-call incident log</li>
+            <li class="chip">BOLO manager</li>
+            <li class="chip">Local save / import / export</li>
+            <li class="chip">Keyboard shortcuts</li>
+          </ul>
+        </section>
+
+        <section class="about__section">
+          <h3 class="about__h3">How it works</h3>
+          <ol class="timeline">
+            <li><b>Create a call</b> — title, location, priority, notes.</li>
+            <li><b>Add units</b> — department &amp; status with color coding.</li>
+            <li><b>Attach units</b> — quick actions for A/E/S.</li>
+            <li><b>Track</b> — per-call incident log with timestamps.</li>
+            <li><b>Manage BOLOs</b> — quick inputs, always visible counts.</li>
+            <li><b>Save/Share</b> — export JSON to reuse next session.</li>
+          </ol>
+        </section>
+
+        <section class="about__section">
+          <h3 class="about__h3">Privacy Policy</h3>
+
+          <div class="policy">
+            <h4>1. Information We Collect</h4>
+            <p>
+              We don’t collect personal data on any server. The app stores your session
+              data locally in your browser (calls, units, BOLOs, and preferences) to make your experience fast and offline-friendly.
+            </p>
+          </div>
+
+          <div class="policy">
+            <h4>2. Data Security</h4>
+            <p>
+              Because data stays on your device, exposure risk is reduced. For best results,
+              use trusted devices and keep your browser up to date.
+            </p>
+          </div>
+
+          <div class="policy">
+            <h4>3. Policy Updates</h4>
+            <p>
+              We may revise this policy to reflect improvements or legal requirements. Changes will be posted here—check back occasionally.
+            </p>
+          </div>
+        </section>
+
+        <section class="about__section">
+          <h3 class="about__h3">FAQ</h3>
+          <details class="faq">
+            <summary>Why manual entry instead of live game data?</summary>
+            <p>Roblox games don’t expose a public API for this use. Manual fields keep it universal and flexible for RP.</p>
+          </details>
+          <details class="faq">
+            <summary>Does it work offline?</summary>
+            <p>Yes. Everything runs in your browser and persists with LocalStorage. You can also export/import JSON.</p>
+          </details>
+          <details class="faq">
+            <summary>Can I request features?</summary>
+            <p>Absolutely—open an issue on GitHub or ping us on Discord.</p>
+          </details>
+        </section>
+      </div>
+
+      <footer class="about__foot">
+        <div class="about__small">
+
+        </div>
+      </footer>
+    </section>
+
+  </main>
+
+  <!-- GLOBAL COUNTS FOOTER (visible everywhere) -->
+  <footer class="footer" id="globalFooter">
+    <div class="stat"><b id="statUnits">0</b> units</div>
+    <div class="stat"><b id="statCalls">0</b> calls</div>
+    <div class="stat"><b id="statBolos">0</b> bolos</div>
+    <span class="chip" id="verChip">v0.9.1</span>
+    <span class="chip" id="schemaChip">schema v1</span>
+  </footer>
+
+  <!-- SETTINGS MODAL -->
+  <dialog id="dlgSettings">
+    <form method="dialog" style="display:flex; flex-direction:column; gap:10px;">
+      <h3>Settings</h3>
+      <label class="inline"><input type="checkbox" id="sInstantDelete"/> Instant delete (skip confirm)</label>
+      <label class="inline"><input type="checkbox" id="sDisableNotifs"/> Disable notifications</label>
+      <label class="inline"><input type="checkbox" id="sSimpleZulu" checked/> Simple Zulu (ISO)</label>
+      <label class="inline"><input type="checkbox" id="sAutoStatus" checked/> Auto status flow (Attach→ENROUTE, Detach→AVAILABLE)</label>
+      <label class="inline"><input type="checkbox" id="sDefaultAvail"/> New units default AVAILABLE</label>
+      <menu class="inline" style="justify-content:flex-end; margin-top:6px;">
+        <button class="btn ghost" value="cancel">Close</button>
+        <button class="btn ok" value="default" id="btnSaveSettings">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- Changelog (classic style) -->
+  <dialog id="dlgChangelog" class="clg">
+    <div class="clg__topbar">
+      <div>
+        <span id="changelogVer">0.0.0</span> is now live
+      </div>
+      <button class="clg__close" aria-label="Close" onclick="document.getElementById('dlgChangelog').close()">✖</button>
+    </div>
+
+    <div class="clg__content">
+      <h3>Major revamp update, redesign, features & more!</h3>
+      <p>
+        With this update, we've introduced a lot of new intuitive interface designs, functionality and bug fixes.
+      </p>
+      <ul>
+        <li>Revamped the platform fully!</li>
+        <li>Working BOLOs!</li>
+        <li>Various keybinds to do actions quickly!</li>
+        <li>Various settings based on your liking!</li>
+        <li>Import & Export your Dispatch Data!</li>
+        <li>New call incident log tracking system!</li>
+        <li>Quick status actions!</li>
+        <li>Seamlessly select multiple units to add to calls!</li>
+        <li>And so much more behind-the-scenes changes!</li>
+      </ul>
+    </div>
+  </dialog>
+
+
+  <script src="app.js"></script>
+</body>
 </html>
